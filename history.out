@@ -1,0 +1,140 @@
+    1  sudo /etc/init.d/vboxadd setup
+    2  sudo systemctl disable vboxadd-service.service
+    3  sudo systemctl enable vboxadd.service
+    4  sudo reboot
+    5  cat /etc/os-release
+    6  exit
+    7  ls
+    8  cd 'Рабочий стол'
+    9  ls
+   10  cd libpolicy
+   11  ls
+   12  whoami
+   13  id
+   14  cat /etc/os-release
+   15  sudo -v
+   16  getent
+   17  getent passwd user1
+   18  getent passwd 1234
+   19  getent group students
+   20  sudo groupadd students
+   21  sudo useradd -m -u 1234 -g students -s /bin/bash user1
+   22  sudo passwd user1
+   23  sudo chage -m 0 -M 90 -W 7 user1
+   24  id user1
+   25  sudo chage -l user1
+   26  stat /home/user1
+   27  getent passwd user1
+   28  getent group students
+   29  sudo find / -type f -perm -4000 -exec ls -ld {} \; 2>/dev/null
+   30  ps -eo ruid,euid,pid,ppid,comm | awk 'NR==1 || ($1>=1000 && $1<=60000 && $2==0)'
+   31  sudo sh -c 'echo "MEPHI: root-only test" > /root/mephi-protected.txt'
+   32  sudo chmod 600 /root/mephi-protected.txt
+   33  sudo -u user1 cat /root/mephi-protected.txt
+   34  sudo cp /usr/bin/cat /home/user1/cat_suid
+   35  sudo chown root:root /home/user1/cat_suid
+   36  sudo chmod 0755 /home/user1/cat_suid
+   37  stat /home/user1/cat_suid
+   38  sudo chmod 4755 /home/user1/cat_suid
+   39  ls -l /home/user1/cat_suid
+   40  sudo -u user1 /home/user1/cat_suid /root/mephi-protected.txt
+   41  sudo stat /home/user1/cat_suid
+   42  sudo ls -l /home/user1/cat_suid
+   43  sudo -u user1 touch /home/user1/mephi-test.txt
+   44  sudo stat /home/user1/mephi-test.txt
+   45  sudo -u user1 /usr/bin/chown root:root /home/user1/mephi-test.txt
+   46  sudo cp /usr/bin/chown /home/user1/chown_cap
+   47  sudo chown root:root /home/user1/chown_cap
+   48  sudo chmod 0755 /home/user1/chown_cap
+   49  sudo setcap cap_chown+ep /home/user1/chown_cap
+   50  sudo getcap /home/user1/chown_cap
+   51  sudo -u user1 /home/user1/chown_cap root:root /home/user1/mephi-test.txt
+   52  sudo stat /home/user1/mephi-test.txt
+   53  command -v date
+   54  printf 'user1 ALL=(root) /usr/bin/date -s *\n' | sudo tee /etc/sudoers.d/mephi-time
+   55  sudo chmod 0440 /etc/sudoers.d/mephi-time
+   56  sudo chown root:root /etc/sudoers.d/mephi-time
+   57  sudo visudo -c
+   58  sudo -l -U user1
+   59  sudo -iu user1
+   60  mkdir -p ~/mephi-linux-security-2026/configs
+   61  cd ~/mephi-linux-security-2026
+   62  pwd
+   63  sudo stat /home/user1 > stat.out
+   64  sudo stat /home/user1/cat_suid >> stat.out
+   65  sudo stat /home/user1/chown_cap >> stat.out
+   66  sudo getcap /home/user1/chown_cap > getcap.out
+   67  sudo fing / -type f -perm -4000 -exec ls -ld {} \; 2>/dev/null > suid-files.out
+   68  ps -eo ruid,euid,pid,ppid,comm | awk 'NR==1 || ($1>=1000 && $1<=60000 && $2==0)' > privileged-processes.out
+   69  cat privileged-processes.out
+   70  ls -lh *.out
+   71  sudo -v
+   72  sudo find / -type f -perm -4000 -exec ls -ld {} \; > suid-files.out 2> suid-find-errors.log
+   73  wc -l suid-files.out
+   74  head -10 suid-files.out
+   75  cat suid-find-errors.log
+   76  mkdir -p configs/etc/sudoers.d
+   77  getent passwd user1 > configs/etc/passwd
+   78  getent group students > configs/etc/group
+   79  sudo getent shadow user1 | awk -F: 'BEGIN {OFS=":"} {$2="REDACTED"; print}' > configs/etc/shadow
+   80  sudo cat /etc/sudoers.d/mephi-time > configs/etc/sudoers.d/mephi-time
+   81  sudo visudo -c > sudo-validation.out
+   82  find configs -type f
+   83  cat configs/etc/shadow
+   84  cat configs/etc/sudoers.d/mephi-time
+   85  command -v spectacle
+   86  printf '\nМЭФИ - Домашнее задание №1\nНомер зачётки: M235198\n'
+   87  spectacle -b -n -o "$HOME/mephi-linux-security-2026/mephi-screenshot.png
+"
+   88  file ~/mephi-linux-security-2026/mephi-screenshot.png
+   89  cat > README.md <<'EOF'
+
+# MEPHI Linux Security 2026
+
+Домашнее задание №1 - Защита операционных систем.
+
+Операционная система: РЕД ОС 8.0.3.
+Выполнение: командная строка GNU/Linux
+
+## Раздел 1. Создание пользователя
+
+Создан пользователь user1 с UID 1234
+Основная группа: students (GID 1001).
+Домашняя директория: /home/user1.
+Права директории: 0700.
+
+Настроена обязательная смена пароля каждые 90 дней.
+Предупреждение: за 7 дней.
+
+## Раздел 2. Мониторинг
+
+Поиск файлов с Set-UID выполнен командой find.
+Обнаружены 33 файла с установленным битом Set-UID.
+
+Мониторинг процессов выполнен с помощью ps и awk.
+Обнаружен процесс fusermont3:
+RUID = 1000, EUID = 0.
+## Раздел 3. Механизм Set-UID
+
+Утилита: /usr/bin/cat/
+Копия: /home/user1/cat_suid.
+
+Koпии назначены владелец root и права 4755.
+
+Обычный пользователь не смог прочитать
+/root/mephi-protected.txt стандартной командой cat.
+
+После установки Set-UID копия cat успешно прочитала файл.
+
+## Раздел 4. Linux Capabilities
+
+Утилита: /usr/bin/chown/
+Копия: /home/user1/chown/cap/
+
+## Раздел 5 выполнен
+sudo
+EOF
+
+   90  wc -l README.md
+   91  head -10 README.md
+   92  history > history.out
